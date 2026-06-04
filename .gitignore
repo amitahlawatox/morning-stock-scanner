@@ -22,6 +22,7 @@ Thumbs.db
 
 # Scanner cache
 scanner/_sp500_cache.csv
+scanner/_sp500_sectors.csv
 
 # Logs
 *.log

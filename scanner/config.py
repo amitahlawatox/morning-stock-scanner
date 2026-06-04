@@ -13,6 +13,12 @@ load_dotenv(_PROJECT_ROOT / ".env")
 FINNHUB_API_KEY: str = os.getenv("FINNHUB_API_KEY", "")
 POLYGON_API_KEY: str = os.getenv("POLYGON_API_KEY", "")
 
+# ── Twilio / WhatsApp ────────────────────────────────────────
+TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH_TOKEN", "")
+TWILIO_WHATSAPP_FROM: str = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
+WHATSAPP_TO: str = os.getenv("WHATSAPP_TO", "")
+
 # ── Rate-limit delays (seconds) ─────────────────────────────
 FINNHUB_DELAY: float = 1.1   # ~54 calls/min → safely under 60/min
 POLYGON_DELAY: float = 12.0  # 5 calls/min on free tier

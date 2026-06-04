@@ -18,6 +18,7 @@ _WIKI_URL = (
     "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 )
 _CACHE_FILE = Path(__file__).resolve().parent / "_sp500_cache.csv"
+_SECTOR_CACHE_FILE = Path(__file__).resolve().parent / "_sp500_sectors.csv"
 
 
 def fetch_sp500_tickers(*, use_cache: bool = True) -> list[str]:
@@ -78,3 +79,73 @@ def fetch_sp500_tickers(*, use_cache: bool = True) -> list[str]:
         raise RuntimeError(
             "Cannot obtain S&P 500 ticker list – no network and no cache."
         ) from exc
+
+
+def fetch_sp500_sectors(*, use_cache: bool = True) -> dict[str, dict]:
+    """Return sector mapping: {ticker: {sector, sub_industry}}.
+
+    Scrapes Wikipedia for GICS Sector and Sub-Industry. Caches locally.
+    """
+    if use_cache and _SECTOR_CACHE_FILE.exists():
+        try:
+            cached = pd.read_csv(_SECTOR_CACHE_FILE)
+            mapping = {}
+            for _, row in cached.iterrows():
+                sym = str(row["Symbol"]).strip().replace(".", "-")
+                sector_val = row.get("GICS Sector", "")
+                sub_val = row.get("GICS Sub-Industry", "")
+                mapping[sym] = {
+                    "sector": sector_val if isinstance(sector_val, str) else "",
+                    "sub_industry": sub_val if isinstance(sub_val, str) else "",
+                }
+            if len(mapping) >= 400:
+                logger.info("Loaded %d sector mappings from cache", len(mapping))
+                return mapping
+        except Exception:
+            logger.warning("Sector cache read failed; will re-fetch.")
+
+    try:
+        logger.info("Fetching S&P 500 sector data from Wikipedia …")
+        headers = {"User-Agent": "MorningStockScanner/1.0 (educational project)"}
+        resp = requests.get(_WIKI_URL, headers=headers, timeout=15)
+        resp.raise_for_status()
+        tables = pd.read_html(StringIO(resp.text))
+        df = tables[0]
+
+        mapping = {}
+        for _, row in df.iterrows():
+            sym = str(row["Symbol"]).strip().replace(".", "-")
+            sector_val = row.get("GICS Sector", "")
+            sub_val = row.get("GICS Sub-Industry", "")
+            mapping[sym] = {
+                "sector": sector_val if isinstance(sector_val, str) else "",
+                "sub_industry": sub_val if isinstance(sub_val, str) else "",
+            }
+
+        # Cache
+        df[["Symbol", "GICS Sector", "GICS Sub-Industry"]].to_csv(
+            _SECTOR_CACHE_FILE, index=False
+        )
+        logger.info("Fetched %d sector mappings", len(mapping))
+        return mapping
+
+    except Exception as exc:
+        logger.error("Sector fetch failed: %s", exc)
+        if _SECTOR_CACHE_FILE.exists():
+            try:
+                cached = pd.read_csv(_SECTOR_CACHE_FILE)
+                mapping = {}
+                for _, row in cached.iterrows():
+                    sym = str(row["Symbol"]).strip().replace(".", "-")
+                    sector_val = row.get("GICS Sector", "")
+                    sub_val = row.get("GICS Sub-Industry", "")
+                    mapping[sym] = {
+                        "sector": sector_val if isinstance(sector_val, str) else "",
+                        "sub_industry": sub_val if isinstance(sub_val, str) else "",
+                    }
+                logger.warning("Using stale sector cache (%d)", len(mapping))
+                return mapping
+            except Exception:
+                pass
+        logger.warning("No sector data available – regime filter will be skipped")
+        return {}
