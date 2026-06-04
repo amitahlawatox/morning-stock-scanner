@@ -25,6 +25,7 @@ import pytz
 from .config import FINNHUB_API_KEY, POLYGON_API_KEY
 from .data_acquisition import fetch_company_news, fetch_general_news
 from .geopolitical import geopolitical_filter
+from .notify import send_whatsapp_report
 from .regime import regime_filter
 from .report import generate_report
 from .sentiment import sentiment_filter
@@ -153,6 +154,15 @@ def run_pipeline(*, dry_run: bool = False):
     print("\n[8/8] Generating Markdown report …")
     report_path = generate_report(stage4, general_news, stage_counts)
     print(f"       → Report saved: {report_path}")
+
+    # ── WhatsApp Notification ─────────────────────────────────
+    from pathlib import Path
+    report_content = Path(report_path).read_text(encoding="utf-8")
+    print("\n[NOTIFY] Sending report via WhatsApp …")
+    if send_whatsapp_report(report_content):
+        print("       → WhatsApp message sent successfully")
+    else:
+        print("       → WhatsApp notification skipped (check config/logs)")
 
     elapsed = time.time() - t0
     print("\n" + "=" * 60)
