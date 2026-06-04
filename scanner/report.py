@@ -30,6 +30,9 @@ def _format_ticker_section(cand: dict) -> str:
         f"| Price Velocity (5-day) | {cand.get('price_velocity', 'N/A')}% |",
         f"| Pre-Market Volume Ratio | {cand.get('volume_ratio', 'N/A')} |",
         f"| Geo Risk Hits | {cand.get('geo_risk_hits', 0)} |",
+        f"| Sector | {cand.get('ticker_sector', 'N/A')} |",
+        f"| Regime Alignment | {', '.join(cand.get('regime_themes', [])) or 'Neutral'} |",
+        f"| Regime Score | {cand.get('regime_score', 0):+.0f} |",
     ]
 
     # Stress-test results
@@ -73,6 +76,7 @@ def generate_report(
         f"| S&P 500 Universe | {all_stage_counts.get('universe', '?')} |",
         f"| Stage 1: Sentiment Filter | {all_stage_counts.get('sentiment', '?')} |",
         f"| Stage 2: Geopolitical Filter | {all_stage_counts.get('geopolitical', '?')} |",
+        f"| Stage 2.5: Regime Alignment | {all_stage_counts.get('regime', '?')} |",
         f"| Stage 3: Technical Filter | {all_stage_counts.get('technical', '?')} |",
         f"| Stage 4: Stress-Test Survivors | {all_stage_counts.get('stress', '?')} |",
         "",
