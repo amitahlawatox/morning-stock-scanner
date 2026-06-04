@@ -92,9 +92,11 @@ def fetch_sp500_sectors(*, use_cache: bool = True) -> dict[str, dict]:
             mapping = {}
             for _, row in cached.iterrows():
                 sym = str(row["Symbol"]).strip().replace(".", "-")
+                sector_val = row.get("GICS Sector", "")
+                sub_val = row.get("GICS Sub-Industry", "")
                 mapping[sym] = {
-                    "sector": row.get("GICS Sector", ""),
-                    "sub_industry": row.get("GICS Sub-Industry", ""),
+                    "sector": sector_val if isinstance(sector_val, str) else "",
+                    "sub_industry": sub_val if isinstance(sub_val, str) else "",
                 }
             if len(mapping) >= 400:
                 logger.info("Loaded %d sector mappings from cache", len(mapping))
@@ -113,9 +115,11 @@ def fetch_sp500_sectors(*, use_cache: bool = True) -> dict[str, dict]:
         mapping = {}
         for _, row in df.iterrows():
             sym = str(row["Symbol"]).strip().replace(".", "-")
+            sector_val = row.get("GICS Sector", "")
+            sub_val = row.get("GICS Sub-Industry", "")
             mapping[sym] = {
-                "sector": row.get("GICS Sector", ""),
-                "sub_industry": row.get("GICS Sub-Industry", ""),
+                "sector": sector_val if isinstance(sector_val, str) else "",
+                "sub_industry": sub_val if isinstance(sub_val, str) else "",
             }
 
         # Cache
@@ -133,9 +137,11 @@ def fetch_sp500_sectors(*, use_cache: bool = True) -> dict[str, dict]:
                 mapping = {}
                 for _, row in cached.iterrows():
                     sym = str(row["Symbol"]).strip().replace(".", "-")
+                    sector_val = row.get("GICS Sector", "")
+                    sub_val = row.get("GICS Sub-Industry", "")
                     mapping[sym] = {
-                        "sector": row.get("GICS Sector", ""),
-                        "sub_industry": row.get("GICS Sub-Industry", ""),
+                        "sector": sector_val if isinstance(sector_val, str) else "",
+                        "sub_industry": sub_val if isinstance(sub_val, str) else "",
                     }
                 logger.warning("Using stale sector cache (%d)", len(mapping))
                 return mapping

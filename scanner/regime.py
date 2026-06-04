@@ -38,7 +38,7 @@ REGIME_THEMES: dict[str, dict] = {
     },
     "Technology": {
         "keywords": [
-            "artificial intelligence", "ai ", "semiconductor", "chip",
+            "artificial intelligence", "ai", "semiconductor", "chip",
             "cloud computing", "software", "data center", "quantum",
             "cybersecurity", "tech earnings", "nvidia", "openai",
         ],
